@@ -1,5 +1,10 @@
 const Utils = require('../utils');
 
+const getEmptyVendors = (data = []) => {
+  const invoiceNumber = data.filter((item, index) => (!item['Vendor Code'] || !item['Vendor name'] || !item['Vendor type']) ? true : false).map(item=> item['Invoice Numbers']);
+  return invoiceNumber;
+};
+
 const getInvalidInvoiceNumbers = (data = [], key = 'Invoice Numbers') => {
   const invoiceNumbers = data.map(item => item[key]);
   const invalidInvoiceNumbers = invoiceNumbers.filter(item => item === 0);
@@ -21,6 +26,14 @@ const getFutureDates = (data = [], postingDateKey = 'Pstng Date', dueDateKey = '
 };
 
 const validateInvoices = (data = []) => {
+  
+  const emptyVendors = getEmptyVendors(data);
+  if (emptyVendors.length) {
+    return {
+      error: `There are no vendor details for invoice number(s) ${emptyVendors.join(', ')}. Please fill and re-upload.`
+    }
+  }
+  
   if (!data.length) {
     return {
       error: 'There is no data in the file.'
